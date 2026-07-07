@@ -1,2 +1,4 @@
 *.fastq.gz
 bowtie_index/
+*.fastq.*.gz
+host.sam
