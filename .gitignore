@@ -3,4 +3,4 @@ bowtie_index/
 *.fastq.*.gz
 host.sam
 nohup.out
-sample.*
+sample.kraken
