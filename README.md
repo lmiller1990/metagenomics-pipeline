@@ -9,3 +9,5 @@ host.fastq.1.gz: 6108 = 1.5K reads
 
 Very few host reads.
 
+Now we must profile and figure out what the community contains.
+
