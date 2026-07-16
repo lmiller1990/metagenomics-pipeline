@@ -1,4 +1,5 @@
 *.fastq.gz
+taxonomy*
 bowtie_index/
 *.fastq.*.gz
 host.sam
