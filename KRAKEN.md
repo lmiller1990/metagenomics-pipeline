@@ -75,9 +75,9 @@ This produces `sample.report` (776K) and `sample.kraken` (1.7G). The `sample.rep
 
 The report tells us that 50.81% of reads are unclassified - probably due to our small database. 48.52% are Bacteria. These two groups represent 99.33% of reads.
 
-`clade_reads` and `direct_reads` means the Clostridia clade contains 4805519 reads in total. 501764 where directly assigned to the C rank (*class*) because kraken could not classify them more specifically. The remaining 4805519 reads where assigned to descendant taxa (family, genus, etc).
+`clade_reads` and `direct_reads` means the Clostridia clade contains 4805519 reads in total. 501764 where directly assigned to the C rank (*class*) because kraken could not classify them more specifically. The remaining 4805519 reads where assigned to descendant taxa (family, genus, etc). The indentation represents the taxanomic hierarchy.
 
- 27.47	4805519	501764	C	186801	          Clostridia
+27.47	4805519	501764	C	186801	          Clostridia
 
 ```
  %    clade_reads  direct_reads  rank  taxid  name
@@ -114,7 +114,6 @@ The report tells us that 50.81% of reads are unclassified - probably due to our 
   0.23	39969	39969	S1	657313	                    [Ruminococcus] torques L2-14
   0.26	46332	46332	S	33038	                  Mediterraneibacter gnavus
   0.18	30616	30616	S	592978	                  Mediterraneibacter faecis
-  0.04	6241	6241	S	342942	                  Mediterraneibacter glycyrrhizinilyticus	
 ```
 
 The remaining ~0.77% are archaea, viruses, and some random human reads that snuck through.
@@ -132,3 +131,43 @@ The remaining ~0.77% are archaea, viruses, and some random human reads that snuc
 
 0.52	90851	0	R1	10239	  Viruses
 ```
+
+## Relative Abundance
+
+One thing that can be useful is knowing the composition of the commiunity; what microbes dominate, etc. This is the *relative abundance*.
+
+There is a tool that can derive this from our kraken report: [bracken](https://github.com/jenniferlu717/Bracken/).
+
+Since we used a prebuilt kraken database, we can just go ahead and run bracken:
+
+```sh
+bracken \
+  -d ../data/standard_8gb \
+  -i sample.report \
+  -o sample.bracken \
+  -r 150 \ # reads - Illumina shotgut
+  -l S # species level estimates
+```
+
+And we get a nice report!
+
+| name | taxonomy_id | taxonomy_lvl | kraken_assigned_reads | added_reads | new_est_reads | fraction_total_reads |
+|---|---|---|---|---|---|---|
+| Blautia obeum | 40520 | S | 612568 | 184274 | 796842 | 0.09280 |
+| Blautia wexlerae | 418240 | S | 475997 | 231781 | 707778 | 0.08243 |
+| Blautia massiliensis (ex Durand et al. 2017) | 1737424 | S | 43594 | 192393 | 235987 | 0.02748 |
+| Blautia sp. SC05B48 | 2479767 | S | 34937 | 45310 | 80247 | 0.00935 |
+| Blautia hydrogenotrophica | 53443 | S | 27960 | 1252 | 29212 | 0.00340 |
+| Blautia luti | 89014 | S | 20051 | 6432 | 26483 | 0.00308 |
+| Blautia producta | 33035 | S | 3031 | 314 | 3345 | 0.00039 |
+| Blautia hansenii | 1322 | S | 1775 | 394 | 2169 | 0.00025 |
+| Blautia argi | 1912897 | S | 939 | 146 | 1085 | 0.00013 |
+| Blautia parvula | 2877527 | S | 665 | 113 | 778 | 0.00009 |
+| Blautia pseudococcoides | 1796616 | S | 598 | 50 | 648 | 0.00008 |
+| Blautia liquoris | 2779518 | S | 257 | 5 | 262 | 0.00003 |
+| [Ruminococcus] torques | 33039 | S | 160774 | 56420 | 217194 | 0.02530 |
+| Mediterraneibacter gnavus | 33038 | S | 46332 | 6803 | 53135 | 0.00619 |
+| Mediterraneibacter faecis | 592978 | S | 30616 | 22228 | 52844 | 0.00615 |
+| Mediterraneibacter glycyrrhizinilyticus | 342942 | S | 6241 | 723 | 6964 | 0.00081 |
+
+This sample is dominated by the genus *Blautia* (class *Clostridia*, Phylum *Bacillota*).
