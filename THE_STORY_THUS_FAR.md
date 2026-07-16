@@ -19,33 +19,46 @@ The sample is dominated by the genus ***Blautia*** (phylum *Bacillota*, class *C
 ### Supporting code
 
 - `tree.py` — parses the Kraken report into a taxonomic tree (uses `graphviz`; currently prints to stdout, dot rendering commented out).
-- `main.py` — placeholder entry point.
-- `bracken_build.sh` — reference for building the Bracken database (already done for `standard_8gb`).
+- `main.py` — placeholder entry point (intended for the deferred analysis).
+- `bracken_build.sh` — reference for building the Bracken database (no longer needed — `.dlist` files are included in the prebuilt Kraken2 DB).
 
-## Where we're going
+## Infrastructure pivot
 
-The user wants to calculate **"distance from average"** — comparing the per-species relative abundances of this sample against a reference cohort to answer: *"Is this a typical human gut microbiome, and if not, what's unusual about it?"*
+The distance-from-average analysis (see "Where we're going" below) is on hold. The immediate priority is productionising the pipeline on GCP.
 
-### The reference cohort question
+### Orchestration: Path A (now), Path B (future)
 
-We discussed possible reference datasets:
+We're keeping it simple for 2–3 samples. A Docker image (bowtie2 + Kraken2 + Bracken) is driven by a parameterised bash script running on a single GCE VM. The VM downloads prebuilt databases from GCS at startup, processes all samples sequentially, uploads results to GCS, then self-destructs. No orchestration framework to learn.
 
-| Dataset | Pros | Cons |
-|---|---|---|
-| **HMP** (Human Microbiome Project) | Gold standard; healthy cohort; well-characterised. | Old data (~2012); may not reflect modern populations. |
-| **American Gut** | Large; open-access; includes "healthy-ish" subjects. | Self-reported; less controlled. |
-| **GMrepo** | Curated; many disease states; abundance tables available directly. | Compositional data from varied pipelines. |
+When we need to scale beyond a handful of samples, we'll migrate to Nextflow on Cloud Batch ("Path B") for per-step machine sizing, workflow-level retry, and per-sample parallelism. The bash script is designed as a clean extraction point — wrap each step as a Nextflow process with minimal refactoring.
 
-Key trade-off: running raw reads from a cohort through our *exact* pipeline (bowtie2 → Kraken2 → Bracken) vs using published abundance tables. The former ensures methodological consistency; the latter is more practical but introduces batch effects.
+### Database strategy
 
-### The statistical approach
+- **Kraken2 DB**: Pre-built ~100 GB standard database as a compressed tarball in GCS. Downloaded to the VM at startup (~90 seconds on a 100 Gbps NIC). No persistent disk — acceptable at this volume.
+- **Bowtie2 index**: GRCh38_noalt, ~3.5 GB, also in GCS.
+- **Bracken .dlist files**: Included in the Kraken2 DB tarball — `bracken-build` is unnecessary.
 
-Because microbiome data is **compositional** (relative abundances sum to 1), standard Euclidean statistics are misleading. We discussed:
+### Per-step machine sizing (reference for Path B)
 
-- **Aitchison distance** — log-ratio based distance for compositional data.
-- **Centred log-ratio (CLR) transform** — maps compositions to real space, enabling z-score-like outlier detection.
-- **Per-species z-scores** — after CLR transform, flag species where the sample deviates significantly from the cohort mean.
+| Step | Instance type | vCPU | RAM |
+|---|---|---|---|
+| bowtie2 | n2d-highcpu-16 | 16 | 16 GB |
+| kraken2 | n2d-highmem-16 | 16 | 128 GB |
+| bracken | n2d-standard-4 | 4 | 16 GB |
 
-### Immediate next step
+Path A uses a single `n2d-highmem-16` for all steps (sized for the most demanding step). The cost difference is negligible at 3 samples (~$4.70 vs ~$2.80 for per-step).
 
-Agreed on: download the HMP (or similar) cohort abundance table, align species names with our Bracken output, compute CLR-transformed z-scores, and identify the species driving the deviation. This will be implemented in `main.py` (or a new analysis script).
+### Design decisions
+
+- Read length is always ~150 bp Illumina — hardcoded in Bracken, no auto-detection.
+- No PHI in the dataset; standard GCP project.
+- Preemptible VMs are acceptable (save ~60%). We'll add per-sample checkpointing (upload intermediates to GCS after each sample) so preemptions only lose the current sample, not the whole batch.
+- The detailed plan (machine types, cost breakdown, startup script, GCS layout, service accounts) is in `PLAN.md`.
+
+## Where we're going (deferred)
+
+Once the GCP pipeline is stable, we'll return to the original analysis question: **"Is this a typical human gut microbiome, and if not, what's unusual about it?"**
+
+The approach is to compare per-species relative abundances against a reference cohort. Because microbiome data is compositional, standard Euclidean statistics are misleading. We'll use the centred log-ratio (CLR) transform and compute z-scores per species — flagging outliers relative to the cohort mean.
+
+The statistical approach and reference dataset options (HMP, American Gut, GMrepo) are documented in the previous version of this file. The key trade-off (methodological consistency from running our exact pipeline on cohort raw reads vs the practicality of using published abundance tables) remains unresolved but will be revisited when we pick this up.
