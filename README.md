@@ -26,3 +26,4 @@ for each read:
 In practice, this is too slow and resource intensive.
 
 Another similar, but more efficient way, is k-mer matching. One tool in this space is Kraken 2 [GitHub](https://github.com/DerrickWood/kraken2), [Paper](https://link.springer.com/article/10.1186/s13059-019-1891-0#Sec1). It breaks the reads into k-mers, (eg if k=31 then into reads that are 31bp in length) and matches those against reference genomes. So for a read of 150bp, with k=31 and a sliding window of 1, the Kraken2 database will contain (150-31)+1=120 entries.
+

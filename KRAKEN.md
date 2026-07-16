@@ -73,5 +73,62 @@ kraken2 \
 
 This produces `sample.report` (776K) and `sample.kraken` (1.7G). The `sample.report` is the **summary by taxon** and the `sample.kraken` is the **classification of each read**.
 
-The report is as follows:
+The report tells us that 50.81% of reads are unclassified - probably due to our small database. 48.52% are Bacteria. These two groups represent 99.33% of reads.
 
+`clade_reads` and `direct_reads` means the Clostridia clade contains 4805519 reads in total. 501764 where directly assigned to the C rank (*class*) because kraken could not classify them more specifically. The remaining 4805519 reads where assigned to descendant taxa (family, genus, etc).
+
+ 27.47	4805519	501764	C	186801	          Clostridia
+
+```
+ %    clade_reads  direct_reads  rank  taxid  name
+ 50.81	8888808	8888808	U	0	unclassified
+ 49.19	8605930	1545	R	1	root
+ 48.66	8513534	2136	R1	131567	  cellular organisms
+ 48.52	8488197	54501	D	2	    Bacteria
+ 33.91	5932339	26853	K	1783272	      Bacillati
+ 29.00	5073066	96676	P	1239	        Bacillota
+ 27.47	4805519	501764	C	186801	          Clostridia
+ 17.21	3010719	389	O	3085636	            Lachnospirales
+ 17.20	3009764	243644	F	186803	              Lachnospiraceae
+  8.19	1432420	210048	G	572511	                Blautia
+  3.50	612568	483739	S	40520	                  Blautia obeum
+  0.59	102489	102489	S1	411459	                    Blautia obeum ATCC 29174
+  0.15	26340	26340	S1	657314	                    Blautia obeum A2-162
+  2.72	475997	344329	S	418240	                  Blautia wexlerae
+  0.75	131668	131668	S1	1121115	                    Blautia wexlerae DSM 19850
+  0.25	43594	43594	S	1737424	                  Blautia massiliensis (ex Durand et al. 2017)
+  0.20	34937	0	G1	2648079	                  unclassified Blautia
+  0.20	34937	34937	S	2479767	                    Blautia sp. SC05B48
+  0.16	27960	24585	S	53443	                  Blautia hydrogenotrophica
+  0.02	3375	3375	S1	476272	                    Blautia hydrogenotrophica DSM 10507
+  0.11	20051	20051	S	89014	                  Blautia luti
+  0.02	3031	3031	S	33035	                  Blautia producta
+  0.01	1775	1230	S	1322	                  Blautia hansenii
+  0.00	545	545	S1	537007	                    Blautia hansenii DSM 20583
+  0.01	939	939	S	1912897	                  Blautia argi
+  0.00	665	665	S	2877527	                  Blautia parvula
+  0.00	598	598	S	1796616	                  Blautia pseudococcoides
+  0.00	257	257	S	2779518	                  Blautia liquoris
+  1.65	288237	41461	G	2316020	                Mediterraneibacter
+  0.92	160774	120805	S	33039	                  [Ruminococcus] torques
+  0.23	39969	39969	S1	657313	                    [Ruminococcus] torques L2-14
+  0.26	46332	46332	S	33038	                  Mediterraneibacter gnavus
+  0.18	30616	30616	S	592978	                  Mediterraneibacter faecis
+  0.04	6241	6241	S	342942	                  Mediterraneibacter glycyrrhizinilyticus	
+```
+
+The remaining ~0.77% are archaea, viruses, and some random human reads that snuck through.
+
+```
+0.00	748	1	D	2157	    Archaea
+0.00	665	0	K	3366610	      Methanobacteriati
+0.00	659	0	P	28890	        Methanobacteriota
+0.00	455	3	P1	2290931	          Stenosarchaea group
+0.00	277	0	C	183963	            Halobacteria
+0.00	277	19	O	2235	              Halobacteriales
+0.00	77	4	F	1644056	                Haloferacaceae
+
+...
+
+0.52	90851	0	R1	10239	  Viruses
+```
