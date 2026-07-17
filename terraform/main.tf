@@ -1,4 +1,8 @@
 terraform {
+  backend "s3" {
+    region = "ap-southeast-2"
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -10,5 +14,5 @@ terraform {
 }
 
 provider "aws" {
-    region = "ap-southeast-2"
+  region = "ap-southeast-2"
 }
