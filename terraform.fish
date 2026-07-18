@@ -18,6 +18,6 @@ switch $argv[1]
     terraform -chdir="terraform" apply
 
   case '*'
-    echo "Usage: ./terraform.fish {plan|apply}"
+    echo "Usage: ./terraform.fish {init|plan|apply}"
     exit 1
 end
