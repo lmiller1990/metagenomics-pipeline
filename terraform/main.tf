@@ -18,12 +18,12 @@ provider "aws" {
 }
 
 resource "aws_instance" "kraken" {
-  ami           = data.aws_ami.ubuntu.id
+  ami                  = data.aws_ami.ubuntu.id
   iam_instance_profile = aws_iam_instance_profile.ec2.name
-  instance_type = "r7i.4xlarge"
+  instance_type        = "r7i.4xlarge"
 
   root_block_device {
-    volume_size = 150
+    volume_size = 200
   }
 }
 
@@ -72,4 +72,41 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 resource "aws_iam_instance_profile" "ec2" {
   name = "kraken-ec2"
   role = aws_iam_role.ec2.name
+}
+
+## Bucket with fastq files
+
+resource "aws_iam_policy" "s3_rw" {
+  name = "kraken-s3-read-write"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::lcm-bioinformatics-db-058664348318-ap-southeast-2-an/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::lcm-bioinformatics-db-058664348318-ap-southeast-2-an"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "s3_rw" {
+  role       = aws_iam_role.ec2.name
+  policy_arn = aws_iam_policy.s3_rw.arn
 }

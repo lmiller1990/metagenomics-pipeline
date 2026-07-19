@@ -17,6 +17,10 @@ switch $argv[1]
     echo "Running terraform apply..."
     terraform -chdir="terraform" apply
 
+  case destroy
+    echo "Running terraform destroy..."
+    terraform -chdir="terraform" destroy
+
   case '*'
     echo "Usage: ./terraform.fish {init|plan|apply}"
     exit 1
